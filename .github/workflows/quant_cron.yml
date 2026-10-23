@@ -37,6 +37,9 @@ jobs:
         # 把跑完生成的交易 CSV 和汇总 CSV 提交回仓库
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add quant_trades.csv summary.csv
+        git add quant_trades.csv
+        # summary.csv is always written by the code, but tolerate a missing
+        # file here as well so a missing summary never blocks the trades commit
+        git add summary.csv || true
         # 如果文件有更新，就 commit 并推送到 main 分支
         git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update quant trades" && git push)

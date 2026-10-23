@@ -1,0 +1,1 @@
+tx_id,timestamp,symbol,direction,entry_price,stop_loss,take_profit,rsi,dev_atr,vwap_z,score,settlement_time,settled_at,exit_price,exit_reason,pnl_pct,is_win,status,strategy_type,source_pool

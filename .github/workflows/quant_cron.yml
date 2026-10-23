@@ -31,11 +31,11 @@ jobs:
       run: |
         python quant_engine.py
 
-    - name: Commit and push database
+    - name: Commit and push trades CSV
       run: |
-        # 伪装成机器人，把跑完生成的 sqlite 数据库提交回仓库
+        # 把跑完生成的交易 CSV 提交回仓库（最终版不再用 SQLite .db）
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add quant_trades.db
-        # 如果数据库有更新，就 commit 并推送到 main 分支
-        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update quant database" && git push)
+        git add quant_trades.csv
+        # 如果 CSV 有更新，就 commit 并推送到 main 分支
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update quant trades" && git push)

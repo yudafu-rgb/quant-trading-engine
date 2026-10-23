@@ -295,27 +295,36 @@ def _summary_rows(df_closed):
     return rows
 
 
+SUMMARY_COLUMNS = ['scope', 'symbol', 'total_trades', 'win_rate', 'avg_win_pct', 'avg_loss_pct', 'profit_factor', 'expectancy_pct', 'max_drawdown_pct']
+
+
 def write_summary():
+    # Always write summary.csv, even with no closed trades yet, so the
+    # workflow's git add never fails on a missing file (first-run deadlock).
     if not os.path.exists(CSV_FILE):
+        pd.DataFrame(columns=SUMMARY_COLUMNS).to_csv(SUMMARY_FILE, index=False)
         return []
     try:
         df = pd.read_csv(CSV_FILE)
     except Exception as e:
         print(f"summary read failed: {e}")
+        pd.DataFrame(columns=SUMMARY_COLUMNS).to_csv(SUMMARY_FILE, index=False)
         return []
     if 'status' not in df.columns or df.empty:
+        pd.DataFrame(columns=SUMMARY_COLUMNS).to_csv(SUMMARY_FILE, index=False)
         return []
     closed = df[df['status'] == 'CLOSED'].copy()
     if closed.empty:
+        pd.DataFrame(columns=SUMMARY_COLUMNS).to_csv(SUMMARY_FILE, index=False)
+        print("summary: no closed trades yet, header-only summary.csv written")
         return []
     if 'settled_at' in closed.columns:
         closed = closed.sort_values('settled_at', na_position='last')
     rows = _summary_rows(closed)
-    if rows:
-        out = pd.DataFrame(rows)
-        out.to_csv(SUMMARY_FILE, index=False)
-        print("summary:")
-        print(out.to_string(index=False))
+    out = pd.DataFrame(rows, columns=SUMMARY_COLUMNS)
+    out.to_csv(SUMMARY_FILE, index=False)
+    print("summary:")
+    print(out.to_string(index=False))
     return rows
 
 

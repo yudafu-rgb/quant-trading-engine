@@ -10,8 +10,9 @@ on:
 jobs:
   run-model:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
-      contents: write # 赋予机器人提交数据库文件回仓库的权限
+      contents: write # 赋予机器人提交交易文件回仓库的权限
 
     steps:
     - name: Checkout repository
@@ -33,9 +34,9 @@ jobs:
 
     - name: Commit and push trades CSV
       run: |
-        # 把跑完生成的交易 CSV 提交回仓库（最终版不再用 SQLite .db）
+        # 把跑完生成的交易 CSV 和汇总 CSV 提交回仓库
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add quant_trades.csv
-        # 如果 CSV 有更新，就 commit 并推送到 main 分支
+        git add quant_trades.csv summary.csv
+        # 如果文件有更新，就 commit 并推送到 main 分支
         git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update quant trades" && git push)

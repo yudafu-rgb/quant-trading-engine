@@ -1,0 +1,41 @@
+name: Quant Engine Auto-Runner
+
+on:
+  schedule:
+    # 这里的 cron 是 UTC 时间。
+    # 0 0,8,16 代表 UTC 的 0点、8点、16点 (即北京时间/东八区 08:00, 16:00, 24:00)
+    - cron: '0 0,8,16 * * *'
+  workflow_dispatch: # 保留这个，允许你在 GitHub 网页上手动点击按钮立即运行测试
+
+jobs:
+  run-model:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 赋予机器人提交数据库文件回仓库的权限
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Quant Engine
+      run: |
+        python quant_engine.py
+
+    - name: Commit and push database
+      run: |
+        # 伪装成机器人，把跑完生成的 sqlite 数据库提交回仓库
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add quant_trades.db
+        # 如果数据库有更新，就 commit 并推送到 main 分支
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update quant database" && git push)
